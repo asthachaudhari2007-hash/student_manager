@@ -1,0 +1,53 @@
+{% extends "layout/base.html" %}
+{% block title %} Import Results from PDF {% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h2 class="fw-bold"><i class="bi bi-file-earmark-pdf-fill text-danger"></i> Import Results from PDF</h2>
+    <p class="text-muted mb-0">Students are matched by enrollment number found in the PDF.</p>
+  </div>
+  <a href="{{ url_for('results.list_results') }}" class="btn btn-secondary">Back to Results</a>
+</div>
+
+<div class="card shadow-sm border-0" style="max-width:700px">
+  <div class="card-body">
+    <form method="post" enctype="multipart/form-data" class="row g-3">
+
+      <div class="col-md-6">
+        <label class="form-label">Subject</label>
+        <input name="subject" class="form-control" required placeholder="e.g. Data Structures">
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label">Exam type</label>
+        <select name="exam_type" class="form-select">
+          {% for e in exam_types %}<option>{{ e }}</option>{% endfor %}
+        </select>
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label">Semester</label>
+        <input name="semester" type="number" min="1" class="form-control" required>
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label">Max marks <small class="text-muted">(used if the PDF has no max column)</small></label>
+        <input name="max_marks" type="number" step="0.01" class="form-control" value="100" required>
+      </div>
+
+      <div class="col-12">
+        <label class="form-label">Results PDF</label>
+        <input name="pdf" type="file" accept=".pdf" class="form-control" required>
+        <div class="form-text">PDF rows need the enrollment number and the marks (e.g. <code>45</code> or <code>45/50</code>).</div>
+      </div>
+
+      <div class="col-12">
+        <button class="btn btn-success"><i class="bi bi-upload"></i> Import</button>
+        <a href="{{ url_for('results.list_results') }}" class="btn btn-outline-secondary">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}

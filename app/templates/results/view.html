@@ -1,0 +1,16 @@
+{% extends "layout/base.html" %}
+{% block title %} Result {% endblock %}
+{% block content %}
+<h2 class="fw-bold mb-3">Result Details</h2>
+<table class="table" style="max-width:600px">
+  <tr><th>Student</th><td>{{ result.student.first_name }} {{ result.student.last_name }}</td></tr>
+  <tr><th>Subject</th><td>{{ result.subject }}</td></tr>
+  <tr><th>Exam</th><td>{{ result.exam_type }}</td></tr>
+  <tr><th>Semester</th><td>{{ result.semester }}</td></tr>
+  <tr><th>Marks</th><td>{{ result.marks }} / {{ result.max_marks }}</td></tr>
+  <tr><th>Percentage</th><td>{{ result.percentage }}%</td></tr>
+  <tr><th>Grade</th><td>{{ result.grade }}</td></tr>
+</table>
+<a href="{{ url_for('results.report_card', student_id=result.student_id) }}" class="btn btn-outline-primary">Report card</a>
+<a href="{{ url_for('results.list_results') }}" class="btn btn-secondary">Back</a>
+{% endblock %}

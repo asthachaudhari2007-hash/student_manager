@@ -1,0 +1,32 @@
+{% extends "layout/base.html" %}
+{% block title %} {{ 'Edit' if result else 'Add' }} Result {% endblock %}
+{% block content %}
+{% set v = form if form else {} %}
+<h2 class="fw-bold mb-3">{{ 'Edit' if result else 'Add' }} Result</h2>
+<form method="post" class="row g-3" style="max-width:700px">
+  <div class="col-12">
+    <label class="form-label">Student</label>
+    <select name="student_id" class="form-select" required>
+      {% for s in students %}
+      <option value="{{ s.id }}" {{ 'selected' if (result and result.student_id == s.id) or v.get('student_id')|string == s.id|string }}>{{ s.first_name }} {{ s.last_name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-md-6"><label class="form-label">Subject</label>
+    <input name="subject" class="form-control" required value="{{ v.get('subject') or (result.subject if result else '') }}"></div>
+  <div class="col-md-6"><label class="form-label">Exam type</label>
+    <select name="exam_type" class="form-select">
+      {% for e in exam_types %}<option {{ 'selected' if (result and result.exam_type == e) or v.get('exam_type') == e }}>{{ e }}</option>{% endfor %}
+    </select></div>
+  <div class="col-md-4"><label class="form-label">Marks</label>
+    <input name="marks" type="number" step="0.01" class="form-control" required value="{{ v.get('marks') or (result.marks if result else '') }}"></div>
+  <div class="col-md-4"><label class="form-label">Max marks</label>
+    <input name="max_marks" type="number" step="0.01" class="form-control" required value="{{ v.get('max_marks') or (result.max_marks if result else 100) }}"></div>
+  <div class="col-md-4"><label class="form-label">Semester</label>
+    <input name="semester" type="number" min="1" class="form-control" required value="{{ v.get('semester') or (result.semester if result else '') }}"></div>
+  <div class="col-12">
+    <button class="btn btn-primary">Save</button>
+    <a href="{{ url_for('results.list_results') }}" class="btn btn-secondary">Cancel</a>
+  </div>
+</form>
+{% endblock %}

@@ -1,0 +1,169 @@
+{% extends "layout/base.html" %}
+{% block title %} Feedback {% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+  <div>
+    <h2 class="fw-bold"><i class="bi bi-chat-left-text-fill text-primary"></i> Student Feedback</h2>
+    <p class="text-muted mb-0">Generate a Google Form for each student and track who has filled it.</p>
+  </div>
+
+  <div class="d-flex gap-2 flex-wrap">
+    {% if connected %}
+      <span class="badge bg-success align-self-center"><i class="bi bi-google"></i> Google connected</span>
+      <form method="post" action="{{ url_for('feedback.google_disconnect') }}">
+        <button class="btn btn-sm btn-outline-secondary">Disconnect</button>
+      </form>
+    {% else %}
+      <a href="{{ url_for('feedback.google_connect') }}" class="btn btn-danger {{ 'disabled' if not has_secret }}">
+        <i class="bi bi-google"></i> Connect Google
+      </a>
+    {% endif %}
+  </div>
+</div>
+
+{% if not has_secret %}
+<div class="alert alert-warning">
+  <strong>client_secret.json not found.</strong> Create an OAuth client in Google Cloud and save the downloaded
+  file as <code>client_secret.json</code> in your project folder (next to <code>run.py</code>).
+</div>
+{% endif %}
+
+<!-- ===================== STATS ===================== -->
+<div class="row g-4 mb-4">
+  <div class="col-lg col-md-6"><div class="card border-0 shadow-sm"><div class="card-body">
+    <small class="text-muted">Students</small><h2 class="fw-bold mt-2">{{ stats.students }}</h2></div></div></div>
+  <div class="col-lg col-md-6"><div class="card border-0 shadow-sm"><div class="card-body">
+    <small class="text-muted">Forms created</small><h2 class="fw-bold mt-2 text-primary">{{ stats.forms }}</h2></div></div></div>
+  <div class="col-lg col-md-6"><div class="card border-0 shadow-sm"><div class="card-body">
+    <small class="text-muted">Filled</small><h2 class="fw-bold mt-2 text-success">{{ stats.filled }}</h2></div></div></div>
+  <div class="col-lg col-md-6"><div class="card border-0 shadow-sm"><div class="card-body">
+    <small class="text-muted">Pending</small><h2 class="fw-bold mt-2 text-danger">{{ stats.pending }}</h2></div></div></div>
+  <div class="col-lg col-md-6"><div class="card border-0 shadow-sm"><div class="card-body">
+    <small class="text-muted">Response rate</small><h2 class="fw-bold mt-2 text-info">{{ stats.rate }}%</h2></div></div></div>
+</div>
+
+{% if stats.forms %}
+<div class="progress mb-4" style="height:22px;">
+  <div class="progress-bar bg-success" style="width: {{ stats.rate }}%;">{{ stats.filled }} / {{ stats.forms }} filled</div>
+</div>
+{% endif %}
+
+<!-- ===================== ACTIONS ===================== -->
+<div class="card shadow-sm border-0 mb-4">
+  <div class="card-body">
+    <div class="row g-3 align-items-end">
+      <form method="post" action="{{ url_for('feedback.generate') }}" class="col-lg-6 d-flex gap-2 align-items-end">
+        <div class="flex-grow-1">
+          <label class="form-label mb-1">Form title</label>
+          <input name="title" class="form-control" value="Course Feedback">
+        </div>
+        <button class="btn btn-primary text-nowrap" {{ 'disabled' if not connected }}>
+          <i class="bi bi-magic"></i> Generate for all ({{ stats.no_form }})
+        </button>
+      </form>
+
+      <div class="col-lg-6 d-flex gap-2 justify-content-lg-end flex-wrap">
+        <form method="post" action="{{ url_for('feedback.refresh') }}">
+          <button class="btn btn-success" {{ 'disabled' if not connected or not stats.forms }}>
+            <i class="bi bi-arrow-repeat"></i> Check responses
+          </button>
+        </form>
+        <a href="{{ url_for('feedback.export_csv') }}" class="btn btn-outline-secondary {{ 'disabled' if not stats.forms }}">
+          <i class="bi bi-download"></i> Export links (CSV)
+        </a>
+      </div>
+    </div>
+    {% if last_checked %}
+      <small class="text-muted d-block mt-2">Responses checked automatically. Last check: {{ last_checked.strftime('%d %b %Y, %H:%M') }} UTC</small>
+    {% endif %}
+  </div>
+</div>
+
+<!-- ===================== TABLE ===================== -->
+<div class="card shadow-sm border-0">
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>Enrollment</th><th>Name</th><th>Status</th><th>Sent</th><th>Last response</th><th class="text-end">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for s in students %}
+          {% set f = forms.get(s.id) %}
+          <tr>
+            <td>{{ s.enrollment_no }}</td>
+            <td><strong>{{ s.first_name }} {{ s.last_name }}</strong></td>
+            <td>
+              {% if not f %}<span class="badge bg-secondary">No form</span>
+              {% elif f.is_filled %}<span class="badge bg-success">Filled</span>
+              {% else %}<span class="badge bg-warning text-dark">Pending</span>{% endif %}
+            </td>
+            <td>
+              {% if f and f.sent_at %}<small class="text-muted">{{ f.sent_at.strftime('%d %b') }}</small>
+              {% elif f %}<small class="text-muted">-</small>{% endif %}
+            </td>
+            <td>
+              {% if f and f.last_response_at %}<small>{{ f.last_response_at.strftime('%d %b %Y, %H:%M') }}</small>{% endif %}
+            </td>
+            <td class="text-end">
+              {% if f %}
+                <button type="button" class="btn btn-sm btn-outline-primary"
+                        onclick="copyLink(this, '{{ f.responder_url }}')">
+                  <i class="bi bi-clipboard"></i> Copy link
+                </button>
+                {% if s.email %}
+                <a class="btn btn-sm btn-outline-info"
+                   href="mailto:{{ s.email }}?subject={{ f.title|urlencode }}&body={{ ('Please fill in this feedback form: ' ~ f.responder_url)|urlencode }}">
+                  <i class="bi bi-envelope"></i>
+                </a>
+                {% endif %}
+                <a class="btn btn-sm btn-outline-secondary" href="{{ f.responder_url }}" target="_blank" title="Open form"><i class="bi bi-box-arrow-up-right"></i></a>
+                <a class="btn btn-sm btn-outline-dark" href="{{ url_for('feedback.debug_form', id=f.id) }}" target="_blank" title="Debug: what does Google return?"><i class="bi bi-bug"></i></a>
+                <form method="post" action="{{ url_for('feedback.mark_sent', id=f.id) }}" class="d-inline">
+                  <button class="btn btn-sm btn-outline-success" title="Mark as sent"><i class="bi bi-send-check"></i></button>
+                </form>
+                <form method="post" action="{{ url_for('feedback.delete_form', id=f.id) }}" class="d-inline"
+                      onsubmit="return confirm('Remove this record? The Google Form itself stays in your Drive.')">
+                  <button class="btn btn-sm btn-outline-danger" title="Remove record"><i class="bi bi-trash"></i></button>
+                </form>
+              {% else %}
+                <form method="post" action="{{ url_for('feedback.generate') }}" class="d-inline">
+                  <input type="hidden" name="student_id" value="{{ s.id }}">
+                  <input type="hidden" name="title" value="Course Feedback">
+                  <button class="btn btn-sm btn-primary" {{ 'disabled' if not connected }}>Generate</button>
+                </form>
+              {% endif %}
+            </td>
+          </tr>
+        {% else %}
+          <tr><td colspan="6" class="text-center text-muted py-4">No students found.</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Auto-refresh: while some forms are still pending, reload every 60s
+  // (the server checks Google for new responses on each load).
+  {% if connected and stats.pending > 0 %}
+  setInterval(() => {
+    const typing = document.activeElement && document.activeElement.tagName === 'INPUT';
+    if (document.visibilityState === 'visible' && !typing) location.reload();
+  }, 60000);
+  {% endif %}
+
+  function copyLink(btn, url) {
+    navigator.clipboard.writeText(url).then(() => {
+      const old = btn.innerHTML;
+      btn.innerHTML = '<i class="bi bi-check2"></i> Copied';
+      setTimeout(() => btn.innerHTML = old, 1500);
+    });
+  }
+</script>
+
+{% endblock %}

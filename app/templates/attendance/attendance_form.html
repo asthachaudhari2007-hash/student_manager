@@ -1,0 +1,167 @@
+{% extends "layout/base.html" %}
+
+{% block title %}
+{% if edit %}
+Edit Attendance
+{% else %}
+Mark Attendance
+{% endif %}
+{% endblock %}
+
+{% block content %}
+
+<div class="container">
+
+    <div class="row justify-content-center">
+
+        <div class="col-lg-8">
+
+            <div class="card shadow-lg border-0">
+
+                <!-- Header -->
+
+                <div class="card-header bg-success text-white">
+
+                    <h3 class="mb-0">
+
+                        {% if edit %}
+
+                        <i class="bi bi-pencil-square"></i>
+                        Edit Attendance
+
+                        {% else %}
+
+                        <i class="bi bi-calendar-check-fill"></i>
+                        Mark Attendance
+
+                        {% endif %}
+
+                    </h3>
+
+                </div>
+
+                <!-- Body -->
+
+                <div class="card-body">
+
+                    <form method="POST">
+
+                        {{ form.hidden_tag() }}
+
+                        <!-- Student -->
+
+                        <div class="mb-3">
+
+                            {{ form.student_id.label(class="form-label fw-bold") }}
+
+                            {{ form.student_id(class="form-select") }}
+
+                            {% for error in form.student_id.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+
+                        </div>
+
+                        <!-- Subject -->
+
+                        <div class="mb-3">
+
+                            {{ form.subject.label(class="form-label fw-bold") }}
+
+                            {{ form.subject(
+                                class="form-control",
+                                placeholder="Enter Subject Name"
+                            ) }}
+
+                            {% for error in form.subject.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+
+                        </div>
+
+                        <!-- Date & Status -->
+
+                        <div class="row">
+
+                            <div class="col-md-6 mb-3">
+
+                                {{ form.date.label(class="form-label fw-bold") }}
+
+                                {{ form.date(class="form-control") }}
+
+                                {% for error in form.date.errors %}
+                                    <div class="text-danger small">{{ error }}</div>
+                                {% endfor %}
+
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+
+                                {{ form.status.label(class="form-label fw-bold") }}
+
+                                {{ form.status(class="form-select") }}
+
+                                {% for error in form.status.errors %}
+                                    <div class="text-danger small">{{ error }}</div>
+                                {% endfor %}
+
+                            </div>
+
+                        </div>
+
+                        <!-- Remarks -->
+
+                        <div class="mb-3">
+
+                            {{ form.remarks.label(class="form-label fw-bold") }}
+
+                            {{ form.remarks(
+                                class="form-control",
+                                rows="4",
+                                placeholder="Optional remarks..."
+                            ) }}
+
+                        </div>
+
+                        <hr>
+
+                        <!-- Buttons -->
+
+                        <div class="d-flex justify-content-between">
+
+                            <a
+                                href="{{ url_for('attendance.attendance_list') }}"
+                                class="btn btn-secondary"
+                            >
+
+                                <i class="bi bi-arrow-left-circle"></i>
+
+                                Back
+
+                            </a>
+
+                            {{ form.submit(class="btn btn-success px-4") }}
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+                <!-- Footer -->
+
+                <div class="card-footer text-muted text-center">
+
+                    CampusFlow Attendance Management System
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

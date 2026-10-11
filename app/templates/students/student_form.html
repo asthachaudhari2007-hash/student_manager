@@ -1,0 +1,118 @@
+{% extends "layout/base.html" %}
+
+{% block title %}Add Student{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid">
+
+    <div class="card shadow-sm border-0">
+
+        <div class="card-header bg-primary text-white">
+            <h3 class="mb-0">
+                <i class="bi bi-person-plus-fill"></i>
+                Add Student
+            </h3>
+        </div>
+
+        <div class="card-body">
+
+            <form method="POST">
+
+                {{ form.hidden_tag() }}
+
+                <div class="row">
+
+                    <!-- Enrollment Number -->
+                    <div class="col-md-6 mb-3">
+                        {{ form.enrollment_no.label(class="form-label") }}
+                        {{ form.enrollment_no(class="form-control", placeholder="Enter Enrollment Number") }}
+                    </div>
+
+                    <!-- Roll Number -->
+                    <div class="col-md-6 mb-3">
+                        {{ form.roll_no.label(class="form-label") }}
+                        {{ form.roll_no(class="form-control", placeholder="Enter Roll Number") }}
+                    </div>
+
+                    <!-- First Name -->
+                    <div class="col-md-6 mb-3">
+                        {{ form.first_name.label(class="form-label") }}
+                        {{ form.first_name(class="form-control", placeholder="Enter First Name") }}
+                    </div>
+
+                    <!-- Last Name -->
+                    <div class="col-md-6 mb-3">
+                        {{ form.last_name.label(class="form-label") }}
+                        {{ form.last_name(class="form-control", placeholder="Enter Last Name") }}
+                    </div>
+
+                    <!-- Email -->
+                    <div class="col-md-6 mb-3">
+                        {{ form.email.label(class="form-label") }}
+                        {{ form.email(class="form-control", placeholder="Enter Email") }}
+                    </div>
+
+                    <!-- Phone -->
+                    <div class="col-md-6 mb-3">
+                        {{ form.phone.label(class="form-label") }}
+                        {{ form.phone(class="form-control", placeholder="Enter Phone Number") }}
+                    </div>
+
+                    <!-- Gender -->
+                    <div class="col-md-6 mb-3">
+                        {{ form.gender.label(class="form-label") }}
+                        {{ form.gender(class="form-control", placeholder="Male / Female") }}
+                    </div>
+
+                    <!-- Department -->
+                    <div class="col-md-6 mb-3">
+                        {{ form.department.label(class="form-label") }}
+                        {{ form.department(class="form-control", placeholder="Computer Engineering") }}
+                    </div>
+
+                    <!-- Semester -->
+                    <div class="col-md-4 mb-3">
+                        {{ form.semester.label(class="form-label") }}
+                        {{ form.semester(class="form-control") }}
+                    </div>
+
+                    <!-- Section -->
+                    <div class="col-md-4 mb-3">
+                        {{ form.section.label(class="form-label") }}
+                        {{ form.section(class="form-control", placeholder="A") }}
+                    </div>
+
+                    <!-- Admission Year -->
+                    <div class="col-md-4 mb-3">
+                        {{ form.admission_year.label(class="form-label") }}
+                        {{ form.admission_year(class="form-control", placeholder="2026") }}
+                    </div>
+
+                </div>
+
+                <hr>
+
+                <div class="d-flex justify-content-end">
+
+                    <a href="{{ url_for('students.student_list') }}"
+                       class="btn btn-secondary me-2">
+
+                        <i class="bi bi-arrow-left"></i>
+                        Back
+
+                    </a>
+
+                    {{ form.submit(class="btn btn-primary") }}
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
